@@ -59,6 +59,7 @@ function App() {
       <footer>
         <p>Projeto DevOps SATC - React</p>
       </footer>
+      <div className="author-credit">Vitor Martins</div>
     </div>
   );
 }
