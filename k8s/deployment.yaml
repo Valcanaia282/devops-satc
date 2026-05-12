@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-devops
+  namespace: ##K8S_NAMESPACE##
+  labels:
+    app: app-devops
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: app-devops
+  template:
+    metadata:
+      labels:
+        app: app-devops
+    spec:
+      containers:
+      - name: app-devops
+        image: docker.io/##DOCKER_USERNAME##/devops-satc:##K8S_TAG##
+        ports:
+        - containerPort: 4279
+          name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-devops
+  namespace: ##K8S_NAMESPACE##
+  labels:
+    app: app-devops
+spec:
+  type: ClusterIP
+  selector:
+    app: app-devops
+  ports:
+  - port: 80
+    targetPort: 4279
+    name: http
+    protocol: TCP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-devops
+  namespace: ##K8S_NAMESPACE##
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: ##DOCKER_USERNAME##.app.devops-satc.online
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: app-devops
+            port:
+              number: 80
